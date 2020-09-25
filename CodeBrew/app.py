@@ -4,21 +4,30 @@
 import os
 from flask import Flask, request, jsonify, render_template
 from firebase_admin import credentials, firestore, initialize_app
+from route import main
 
 # Initialize Flask App
 app = Flask(__name__)
+
+#register blueprint for user routes
+app.register_blueprint(main)
 
 # Initialize Firestore DB
 cred = credentials.Certificate("key.json")
 default_app = initialize_app(cred)
 db = firestore.client()
-todo_ref = db.collection('todos')
+covid_Passport = db.collection('Covid_Passport')
 
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
+@app.route('/login',methods=['POST','GET'])
+def login():
+    email = request.json['email']
+
+    return render_template('index.html')
 
 @app.route('/add', methods=['POST'])
 def create():
