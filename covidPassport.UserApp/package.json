@@ -1,0 +1,28 @@
+{
+  "name": "nextjs-with-typescript",
+  "version": "4.0.0",
+  "private": true,
+  "dependencies": {
+    "@material-ui/core": "latest",
+    "clsx": "latest",
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest"
+  },
+  "scripts": {
+    "dev": "next",
+    "build": "next build",
+    "start": "next start",
+    "post-update": "echo \"codesandbox preview only, need an update\" && yarn upgrade --latest"
+  },
+  "devDependencies": {
+    "@types/next": "latest",
+    "@types/node": "latest",
+    "@types/qrcode.react": "^1.0.1",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "firebase": "^7.21.1",
+    "qrcode.react": "^1.0.0",
+    "typescript": "latest"
+  }
+}
