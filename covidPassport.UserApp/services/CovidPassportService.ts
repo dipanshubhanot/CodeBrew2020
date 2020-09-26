@@ -1,4 +1,5 @@
 import axios from "axios";
+import { resolve } from "path";
 
 class CovidService {
   private url: string;
@@ -8,6 +9,24 @@ class CovidService {
   }
 
   public getProfiles() {
+    return axios
+      .get(`${this.url}/profile`)
+      .then((response) => {
+        return response.data.map((profile) => {
+          const id = Object.keys(profile)[0];
+          const image = profile[id].image;
+          const name = profile[id].name;
+
+          return {
+            id,
+            image,
+            name,
+          };
+        });
+      })
+      .catch((err) => {
+        console.error(err);
+      });
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         resolve([
@@ -34,7 +53,28 @@ class CovidService {
     });
   }
 
+  addAppointment(profile: any, type: string) {
+    return axios
+      .post(`${this.url}/appointment`, {
+        ...profile,
+        type,
+        status: "pending",
+      })
+      .then(() => {
+        return;
+      })
+      .catch((err) => {
+        console.error(err);
+        return;
+      });
+  }
+
   public getAppointments(profileId: string) {
+    return axios
+      .get(`${this.url}/appointment?requirement=everything`)
+      .then((response) => {
+        return JSON.parse(response.data);
+      });
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         const rows = [
@@ -79,6 +119,21 @@ class CovidService {
         resolve(rows);
       }, 1000);
     });
+  }
+
+  public createProfile(image: string, name: string) {
+    return axios
+      .post(`${this.url}/profile`, {
+        image,
+        name,
+      })
+      .then((response) => {
+        return response.data;
+      })
+      .catch(() => {
+        console.error("Error creating profile");
+        return null;
+      });
   }
 
   public verifyScan(code: string) {
