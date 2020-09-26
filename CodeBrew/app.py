@@ -1,22 +1,20 @@
 # app.py
 
 # Required Imports
-import os
+import os, json, base64
 from flask import Flask, request, jsonify, render_template
 from firebase_admin import credentials, firestore, initialize_app
-from route import main
+from flask_bcrypt import Bcrypt
 
 # Initialize Flask App
 app = Flask(__name__)
-
-#register blueprint for user routes
-app.register_blueprint(main)
+bcrypt = Bcrypt(app)
 
 # Initialize Firestore DB
 cred = credentials.Certificate("key.json")
 default_app = initialize_app(cred)
 db = firestore.client()
-covid_Passport = db.collection('Covid_Passport')
+accounts = db.collection('Accounts')
 
 
 @app.route('/')
@@ -26,11 +24,11 @@ def index():
 @app.route('/login',methods=['POST','GET'])
 def login():
     email = request.json['email']
-
+    
     return render_template('index.html')
 
-@app.route('/add', methods=['POST'])
-def create():
+@app.route('/register', methods=['POST'])
+def register():
     """
         create() : Add document to Firestore collection with request body
         Ensure you pass a custom ID as part of json body in post request
@@ -42,6 +40,37 @@ def create():
         return jsonify({"success": True}), 200
     except Exception as e:
         return f"An Error Occured: {e}"
+
+
+@app.route('/profile', methods=['GET','POST'])
+def profile():
+    print("in profile")
+    if request.method == 'POST':
+        try:
+            # Check if ID was passed to URL query
+            accID = request.json['accountID']
+            #print(request.json)
+            #accID = 'vaishnavi@gmail.com'  
+            profileID = genProfileID(accID)
+            print(profileID)
+            profileDict = {}
+            profileDict[profileID] = request.json
+            '''
+            encoded_string = ""
+            with open("wagyu beef burger.jpeg", "rb") as imgFile:
+                encoded_string = base64.b64encode(imgFile.read())
+            print(type(encoded_string))
+            profileDict["image"] = str(encoded_string)
+            '''
+            data = {u'name': 'zaman',
+                    u'age': 24}
+            accounts.document(accID).set(data)
+            print(json.dumps(profileDict))
+            accounts.document(accID).set({u"profiles": profileDict},merge=True)
+            return jsonify({"success": True}), 200
+        except Exception as e:
+            print("ERRORR!!")
+            return f"An Error Occured: {e}"
 
 
 @app.route('/list', methods=['GET'])
@@ -93,6 +122,12 @@ def delete():
         return jsonify({"success": True}), 200
     except Exception as e:
         return f"An Error Occured: {e}"
+
+
+def genProfileID(accID):
+    unhashedID = accID + '-' + '2' #replace 2 with counter based on no. of profiles
+    hashedID = bcrypt.generate_password_hash(unhashedID)
+    return hashedID.decode("utf-8").replace('/','')
 
 
 port = int(os.environ.get('PORT', 8080))
