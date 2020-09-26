@@ -101,8 +101,7 @@ def verify_login():
 
 def accountCheck(email):
     email = get_user_info(current_user)['email']
-    # return True;
-    return accounts.document(email).get().exists()
+    return accounts.document(email).get().exists
 
 
 @app.route('/')
@@ -144,7 +143,7 @@ def profile():
             profileDict = {}
             profileDict[profileID] = request.json
 
-            print(json.dumps(profileDict))
+            # print(json.dumps(profileDict))
             accounts.document(accID).update({u"profiles": firestore.ArrayUnion([profileDict])})
 
             accounts.document(accID).update({"profile_count": firestore.Increment(1)})
@@ -152,7 +151,9 @@ def profile():
             return jsonify({"success": True}), 200
         except Exception as e:
             print("ERRORR!!")
-            return f"An Error Occured: {e}"
+            print(e)
+            return jsonify({"success": False}), 500
+            return;
 
     if request.method == "GET":
         try:
@@ -233,22 +234,27 @@ def appointment():
             appointment_dict = appointment_doc.to_dict()
 
             # return the appointments associated with the requested profileID
-            if request.json["requirement"] == "profile":
-                if appointment_dict["profileID"] == request.json["profileID"]:
+            if request.args.get('requirement') == "profile":
+                if appointment_dict["profileID"] == request.args.get('requirement')["profileId"]:
                     appointment_list.append(appointment_dict)
 
             # return all the pending appointments
-            if request.json["requirement"] == "pending":
+            if request.args.get('requirement') == "pending":
                 if appointment_dict["status"] == "pending":
                     appointment_list.append(appointment_dict)
 
+            # return all the pending appointments
+            if request.args.get('requirement') == "everything":
+                if appointment_dict["status"] == "complete":
+                    appointment_list.append(appointment_dict)
+
             # return all the COVID - test appointments
-            if request.json["requirement"] == "test":
+            if request.args.get('requirement') == "test":
                 if appointment_dict["type"] == "test":
                     appointment_list.append(appointment_dict)
 
             # return all the COVID - vaccine appointments
-            if request.json["requirement"] == "vaccine":
+            if request.args.get('requirement') == "vaccine":
                 if appointment_dict["type"] == "vaccine":
                     appointment_list.append(appointment_dict)
 

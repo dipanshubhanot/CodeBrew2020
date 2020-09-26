@@ -96,6 +96,7 @@ export default function Index() {
       setSelectedProfile(selectedProfile);
 
       async function loadRows(profileId: string) {
+        console.log("Loading rows");
         const appointmentData = (await CovidPassportService.getAppointments(
           profileId
         )) as any;
@@ -146,6 +147,15 @@ export default function Index() {
           {profiles.map((profile, index) => (
             <ListItem
               onClick={() => {
+                async function loadRows(profileId: string) {
+                  console.log("Loading rows");
+                  const appointmentData = (await CovidPassportService.getAppointments(
+                    profileId
+                  )) as any;
+                  setRows(appointmentData);
+                }
+
+                loadRows(selectedProfile.id);
                 setSelectedProfile(profile);
               }}
               button
