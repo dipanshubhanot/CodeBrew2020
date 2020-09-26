@@ -48,28 +48,32 @@ def profile():
     if request.method == 'POST':
         try:
             # Check if ID was passed to URL query
-            accID = request.json['accountID']
+            #accID = request.json['accountID']
             #print(request.json)
-            #accID = 'vaishnavi@gmail.com'  
-            profileID = genProfileID(accID)
+            accID = 'vaishnavi@gmail.com'  
+            profileCount = accounts.document(accID).get().to_dict()["profile_count"]
+            profileID = genProfileID(accID, profileCount)
             print(profileID)
             profileDict = {}
             profileDict[profileID] = request.json
-            '''
-            encoded_string = ""
-            with open("wagyu beef burger.jpeg", "rb") as imgFile:
-                encoded_string = base64.b64encode(imgFile.read())
-            print(type(encoded_string))
-            profileDict["image"] = str(encoded_string)
-            '''
-            data = {u'name': 'zaman',
-                    u'age': 24}
-            accounts.document(accID).set(data)
+            
             print(json.dumps(profileDict))
-            accounts.document(accID).set({u"profiles": profileDict},merge=True)
+            accounts.document(accID).update({u"profiles": firestore.ArrayUnion([profileDict])})
+            
+            accounts.document(accID).update({"profile_count": firestore.Increment(1)})
+            
             return jsonify({"success": True}), 200
         except Exception as e:
             print("ERRORR!!")
+            return f"An Error Occured: {e}"
+    if request.method == "GET":
+        accID = "vaishnavi@gmail.com"
+        try:
+            accountDetails = accounts.document(accID).get().to_dict()
+            print(accountDetails["profiles"])
+            return jsonify(accountDetails["profiles"]), 200
+            
+        except Exception as e:
             return f"An Error Occured: {e}"
 
 
@@ -124,8 +128,8 @@ def delete():
         return f"An Error Occured: {e}"
 
 
-def genProfileID(accID):
-    unhashedID = accID + '-' + '2' #replace 2 with counter based on no. of profiles
+def genProfileID(accID,profileCount):
+    unhashedID = accID + '-' + str(profileCount) #replace 2 with counter based on no. of profiles
     hashedID = bcrypt.generate_password_hash(unhashedID)
     return hashedID.decode("utf-8").replace('/','')
 
