@@ -16,13 +16,16 @@
     "post-update": "echo \"codesandbox preview only, need an update\" && yarn upgrade --latest"
   },
   "devDependencies": {
+    "@material-ui/icons": "^4.9.1",
     "@types/next": "latest",
     "@types/node": "latest",
     "@types/qrcode.react": "^1.0.1",
     "@types/react": "latest",
     "@types/react-dom": "latest",
+    "@types/react-qr-reader": "^2.1.3",
     "firebase": "^7.21.1",
     "qrcode.react": "^1.0.0",
+    "react-qr-reader": "^2.2.1",
     "typescript": "latest"
   }
 }

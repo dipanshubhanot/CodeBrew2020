@@ -18,6 +18,17 @@ import Paper from "@material-ui/core/Paper";
 import TableBody from "@material-ui/core/TableBody";
 import Chip from "@material-ui/core/Chip";
 import Drawer from "@material-ui/core/Drawer";
+import IconButton from "@material-ui/core/IconButton";
+import Divider from "@material-ui/core/Divider";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
+import ListItemText from "@material-ui/core/ListItemText";
+import ListItem from "@material-ui/core/ListItem";
+import List from "@material-ui/core/List";
+import MenuIcon from "@material-ui/icons/Menu";
+import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
+import ChevronRightIcon from "@material-ui/icons/ChevronRight";
+import InboxIcon from "@material-ui/icons/MoveToInbox";
+import MailIcon from "@material-ui/icons/Mail";
 
 function createData(id: string, type: string, date: string, result: string) {
   return { id, date, type, result };
@@ -62,6 +73,8 @@ const rows = [
   ),
 ];
 
+const profiles = ["Profile 1", "Child 1", "Child 2"];
+
 const StyledTableCell = withStyles((theme) => ({
   head: {
     backgroundColor: theme.palette.info.light,
@@ -81,6 +94,9 @@ const StyledTableRow = withStyles((theme) => ({
 }))(TableRow);
 
 export default function Index() {
+  const [open, setOpen] = React.useState<boolean>(false);
+  const [selectedProfile, setSelectedProfile] = React.useState(profiles[0]);
+
   const getChipColorStyle = (status: string) => {
     switch (status) {
       case "Active":
@@ -95,41 +111,84 @@ export default function Index() {
 
   return (
     <Container maxWidth="sm">
-      {/* <Drawer
-        className={classes.drawer}
+      <IconButton
+        color="inherit"
+        aria-label="open drawer"
+        onClick={() => {
+          setOpen(true);
+        }}
+        edge="start"
+        className={`menu-button ${open ? "hide" : "nohide"}`}
+        style={open ? { display: "none" } : {}}
+      >
+        <MenuIcon />
+      </IconButton>
+      <Drawer
+        className={"drawer"}
         variant="persistent"
         anchor="left"
         open={open}
         classes={{
-          paper: classes.drawerPaper,
+          paper: "drawer-paper",
         }}
       >
-        <div className={classes.drawerHeader}>
-          <IconButton onClick={handleDrawerClose}>
-            {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+        <div className={"drawer-Header"}>
+          <IconButton
+            onClick={() => {
+              setOpen(false);
+            }}
+          >
+            <ChevronLeftIcon />
+            {/* <ChevronRightIcon /> */}
           </IconButton>
         </div>
         <Divider />
         <List>
-          {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-            <ListItem button key={text}>
-              <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon>
+          {profiles.map((text, index) => (
+            <ListItem
+              onClick={() => {
+                setSelectedProfile(text);
+              }}
+              button
+              key={text}
+            >
+              <ListItemIcon>
+                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+              </ListItemIcon>
               <ListItemText primary={text} />
             </ListItem>
           ))}
         </List>
         <Divider />
         <List>
-          {['All mail', 'Trash', 'Spam'].map((text, index) => (
-            <ListItem button key={text}>
-              <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon>
-              <ListItemText primary={text} />
+          <Link href="/dashboard/appointment">
+            <ListItem button key={"Add Appointment"}>
+              <ListItemIcon>
+                <InboxIcon />
+              </ListItemIcon>
+              <ListItemText primary={"Add Appointment "} />
             </ListItem>
-          ))}
+          </Link>
+          <Link href="/dashboard/profile/add">
+            <ListItem button key={"Add Profile"}>
+              <ListItemIcon>
+                <InboxIcon />
+              </ListItemIcon>
+              <ListItemText primary={"Add Profile"} />
+            </ListItem>
+          </Link>
+          <Link href="/dashboard/scan">
+            <ListItem button key={"Scan"}>
+              <ListItemIcon>
+                <InboxIcon />
+              </ListItemIcon>
+              <ListItemText primary={"Scan"} />
+            </ListItem>
+          </Link>
         </List>
-      </Drawer> */}
+      </Drawer>
       <Typography variant="h2" className="centerText">
-        Result Status
+        Results for {selectedProfile}
       </Typography>
       <TableContainer component={Paper}>
         <Table aria-label="customized table">
@@ -142,7 +201,7 @@ export default function Index() {
           </TableHead>
           <TableBody>
             {rows.map((row, i) => (
-              <Link href={`/dashboard/${row.id}`}>
+              <Link href={`/dashboard/qrcode/${row.id}`}>
                 <StyledTableRow key={row.type}>
                   <StyledTableCell component="th" scope="row">
                     {row.type}
@@ -178,6 +237,13 @@ export default function Index() {
         div .background-blue {
           background-color: #2196f3;
           color: white;
+        }
+        button .hide {
+          display: none;
+        }
+        .menu-button {
+          position: absolute !important;
+          left: 25px !important;
         }
       `}</style>
       {/* <Box my={4}>
