@@ -77,13 +77,12 @@ def verify_login():
 
     data = request.get_json()
     if 'uid' in data:
-        global current_user
         current_user = auth.get_user(data['uid'], default_app)
         email = get_user_info(current_user)['email']
         
         print(email)
         #add account document to db if not present
-        if not accountCheck(email):
+        if not accountCheck(current_user):
             nameDict = {}
             nameDict["name"] = get_user_info(current_user)['name']
             nameDict["profile_count"] = 0
@@ -129,7 +128,9 @@ def register():
 def profile():
     print("in profile")
     uID = request.headers['uid']
-    accID = get_user_info(uID)['email']
+    print(uID)
+    current_user = auth.get_user(uID, default_app)
+    accID = get_user_info(current_user)['email']
     if request.method == 'POST':
         try:
             # Check if ID was passed to URL query
@@ -235,8 +236,9 @@ def appointment():
 
             # return the appointments associated with the requested profileID
             if request.args.get('requirement') == "profile":
-                if appointment_dict["profileID"] == request.args.get('requirement')["profileId"]:
-                    appointment_list.append(appointment_dict)
+                if "id" in appointment_dict:
+                    if appointment_dict["id"] == request.args.get('profileId'):
+                        appointment_list.append(appointment_dict)
 
             # return all the pending appointments
             if request.args.get('requirement') == "pending":
