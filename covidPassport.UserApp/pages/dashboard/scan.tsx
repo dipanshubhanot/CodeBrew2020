@@ -1,8 +1,6 @@
 import React from "react";
 import Container from "@material-ui/core/Container";
 import Typography from "@material-ui/core/Typography";
-import QRCode from "qrcode.react";
-import { useRouter } from "next/router";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import dynamic from "next/dynamic";
 import CancelIcon from "@material-ui/icons/Cancel";
@@ -13,7 +11,6 @@ const QrReader = dynamic(() => import("react-qr-reader"), {
 });
 
 export default function Index() {
-  const router = useRouter();
   const [data, setData] = React.useState();
   const [result, setResult] = React.useState();
 
