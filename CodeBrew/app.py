@@ -7,6 +7,7 @@ from firebase_admin import credentials, firestore, initialize_app, auth
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from datetime import datetime
+import uuid
 
 # Initialize Flask App
 app = Flask(__name__)
@@ -159,7 +160,7 @@ def profile():
     if request.method == "GET":
         try:
             accountDetails = accounts.document(accID).get().to_dict()
-            print(accountDetails["profiles"])
+            # print(accountDetails["profiles"])
             return jsonify(accountDetails["profiles"]), 200
 
         except Exception as e:
@@ -218,12 +219,12 @@ def delete():
         return f"An Error Occured: {e}"
 '''
 
-
 @app.route('/appointment', methods=["POST", "GET"])
 def appointment():
     if request.method == "POST":
         date_time = datetime.now()
-        appointments.document(str(date_time)).set(request.json)
+        request.json["date"] = date_time.timestamp()
+        appointments.document(str(date_time.timestamp())).set(request.json)
         return jsonify({"success": True}), 200
 
     if request.method == "GET":
@@ -266,7 +267,7 @@ def appointment():
 def qrScan():
     if request.method == "GET":
         try:
-            appointmentID = request.json['aID']
+            appointmentID = request.args.get('aID')
             appointment = appointments.document(appointmentID).get().to_dict()
             return jsonify(appointment), 200
         except Exception as e:

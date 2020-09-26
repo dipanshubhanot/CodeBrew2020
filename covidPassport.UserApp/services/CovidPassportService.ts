@@ -3,14 +3,20 @@ import { resolve } from "path";
 
 class CovidService {
   private url: string;
+  private uid: string;
 
   constructor() {
     this.url = "http://localhost:8080";
+    this.uid = "";
   }
 
   public getProfiles() {
     return axios
-      .get(`${this.url}/profile`)
+      .get(`${this.url}/profile`, {
+        headers: {
+          uid: window.sessionStorage.getItem("uid"),
+        },
+      })
       .then((response) => {
         return response.data.map((profile) => {
           const id = Object.keys(profile)[0];
@@ -41,6 +47,8 @@ class CovidService {
   }
 
   public login(uid: string): Promise<void> {
+    window.sessionStorage.setItem("uid", uid);
+    console.log("setting uid " + uid);
     console.log("posting login with uid " + uid);
     return new Promise((resolve, reject) => {
       axios
@@ -58,6 +66,8 @@ class CovidService {
       .post(`${this.url}/appointment`, {
         ...profile,
         type,
+        date: new Date(),
+        aptDate: new Date(),
         status: "pending",
       })
       .then(() => {
@@ -71,7 +81,7 @@ class CovidService {
 
   public getAppointments(profileId: string) {
     return axios
-      .get(`${this.url}/appointment?requirement=everything`)
+      .get(`${this.url}/appointment?requirement=profile&profileId=${profileId}`)
       .then((response) => {
         return JSON.parse(response.data);
       });
@@ -123,10 +133,18 @@ class CovidService {
 
   public createProfile(image: string, name: string) {
     return axios
-      .post(`${this.url}/profile`, {
-        image,
-        name,
-      })
+      .post(
+        `${this.url}/profile`,
+        {
+          image,
+          name,
+        },
+        {
+          headers: {
+            uid: window.sessionStorage.getItem("uid"),
+          },
+        }
+      )
       .then((response) => {
         return response.data;
       })
@@ -137,6 +155,14 @@ class CovidService {
   }
 
   public verifyScan(code: string) {
+    return axios
+      .get(`${this.url}/scanner/qrscan?aID=${code}`)
+      .then((response) => {
+        return response.data;
+      })
+      .catch((err) => {
+        console.log(err);
+      });
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         resolve({

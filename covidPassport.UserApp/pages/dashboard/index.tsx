@@ -77,10 +77,12 @@ export default function Index() {
 
   const getChipColorStyle = (status: string) => {
     switch (status) {
-      case "Active":
-      case "Negative":
+      case "injected":
+      case "active":
+      case "complete":
+      case "negative":
         return "background-green";
-      case "Positive":
+      case "positive":
         return "background-red";
       default:
         return "background-blue";
@@ -100,6 +102,7 @@ export default function Index() {
         const appointmentData = (await CovidPassportService.getAppointments(
           profileId
         )) as any;
+        console.log(appointmentData);
         setRows(appointmentData);
       }
 
@@ -155,7 +158,7 @@ export default function Index() {
                   setRows(appointmentData);
                 }
 
-                loadRows(selectedProfile.id);
+                loadRows(profile.id);
                 setSelectedProfile(profile);
               }}
               button
@@ -217,24 +220,24 @@ export default function Index() {
             <TableRow>
               <StyledTableCell>Type</StyledTableCell>
               <StyledTableCell>Date</StyledTableCell>
-              <StyledTableCell align="right">Result</StyledTableCell>
+              <StyledTableCell align="right">Status</StyledTableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {rows &&
               rows.map((row, i) => (
-                <Link key={i} href={`/dashboard/qrcode/${row.id}`}>
+                <Link key={i} href={`/dashboard/qrcode/${row.date}`}>
                   <StyledTableRow key={row.type}>
                     <StyledTableCell component="th" scope="row">
                       {row.type}
                     </StyledTableCell>
                     <StyledTableCell component="th" scope="row">
-                      {row.date}
+                      {row.aptDate}
                     </StyledTableCell>
                     <StyledTableCell align="right">
                       <Chip
-                        className={getChipColorStyle(row.result)}
-                        label={row.result}
+                        className={getChipColorStyle(row.status)}
+                        label={row.status}
                       />
                     </StyledTableCell>
                   </StyledTableRow>
