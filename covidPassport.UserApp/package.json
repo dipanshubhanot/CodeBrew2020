@@ -16,6 +16,7 @@
     "post-update": "echo \"codesandbox preview only, need an update\" && yarn upgrade --latest"
   },
   "devDependencies": {
+    "@material-ui/icons": "^4.9.1",
     "@types/next": "latest",
     "@types/node": "latest",
     "@types/qrcode.react": "^1.0.1",
