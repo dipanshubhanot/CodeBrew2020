@@ -2,12 +2,12 @@ import React from "react";
 import Container from "@material-ui/core/Container";
 import Typography from "@material-ui/core/Typography";
 import Link from "next/link";
-import CardHeader from "@material-ui/core/CardHeader";
-import CardContent from "@material-ui/core/CardContent";
-import Button from "@material-ui/core/Button";
-import CardActions from "@material-ui/core/CardActions";
-import Card from "@material-ui/core/Card";
-import TextField from "@material-ui/core/TextField";
+// import CardHeader from "@material-ui/core/CardHeader";
+// import CardContent from "@material-ui/core/CardContent";
+// import Button from "@material-ui/core/Button";
+// import CardActions from "@material-ui/core/CardActions";
+// import Card from "@material-ui/core/Card";
+// import TextField from "@material-ui/core/TextField";
 import TableContainer from "@material-ui/core/TableContainer";
 import Table from "@material-ui/core/Table";
 import TableHead from "@material-ui/core/TableHead";
@@ -26,11 +26,26 @@ import ListItem from "@material-ui/core/ListItem";
 import List from "@material-ui/core/List";
 import MenuIcon from "@material-ui/icons/Menu";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
-import ChevronRightIcon from "@material-ui/icons/ChevronRight";
+// import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import InboxIcon from "@material-ui/icons/MoveToInbox";
 import MailIcon from "@material-ui/icons/Mail";
 import CovidPassportService from "../../services/CovidPassportService";
 import * as firebase from "firebase";
+
+
+import { makeStyles } from "@material-ui/core/styles";
+import Header from "../../src/components/Header/Header.js";
+import Footer from "../../src/components/Footer/Footer.js";
+import GridContainer from "../../src/components/Grid/GridContainer.js";
+import GridItem from "../../src/components/Grid/GridItem.js";
+import Button from "../../src/components/CustomButtons/Button.js";
+import HeaderLinks from "../../src/components/Header/HeaderLinks.js";
+import Parallax from "../../src/components/Parallax/Parallax.js";
+import styles from "../../src/assets/jss/material-kit-react/views/landingPage.js";
+
+// Section for the page
+import TeamSection from "./Sections/TeamSection.js";
+
 
 const StyledTableCell = withStyles((theme) => ({
   head: {
@@ -77,10 +92,12 @@ export default function Index() {
 
   const getChipColorStyle = (status: string) => {
     switch (status) {
-      case "Active":
-      case "Negative":
+      case "injected":
+      case "active":
+      case "complete":
+      case "negative":
         return "background-green";
-      case "Positive":
+      case "positive":
         return "background-red";
       default:
         return "background-blue";
@@ -96,9 +113,11 @@ export default function Index() {
       setSelectedProfile(selectedProfile);
 
       async function loadRows(profileId: string) {
+        console.log("Loading rows");
         const appointmentData = (await CovidPassportService.getAppointments(
           profileId
         )) as any;
+        console.log(appointmentData);
         setRows(appointmentData);
       }
 
@@ -107,16 +126,35 @@ export default function Index() {
 
     loadProfiles();
   }, []);
+ // card animation
+ const [cardAnimaton, setCardAnimation] = React.useState("cardHidden");
+ setTimeout(function() {
+   setCardAnimation("");
+ }, 700);
+ const useStyles = makeStyles(styles);
+ const classes = useStyles();
 
   return (
-    <Container maxWidth="sm">
+
+      <div
+        className={classes.pageHeader}
+        style={{
+          backgroundImage: "url(" + "/bg7.jpg" + ")",
+          backgroundSize: "cover",
+          backgroundPosition: "top center",
+          height:"100vh",
+          margin:"-50px 0"
+          
+        }}
+      >
+        <div className={classes.container}>
       <IconButton
         color="inherit"
         aria-label="open drawer"
         onClick={() => {
           setOpen(true);
         }}
-        edge="start"
+        
         className={`menu-button ${open ? "hide" : "nohide"}`}
         style={open ? { display: "none" } : {}}
       >
@@ -146,6 +184,15 @@ export default function Index() {
           {profiles.map((profile, index) => (
             <ListItem
               onClick={() => {
+                async function loadRows(profileId: string) {
+                  console.log("Loading rows");
+                  const appointmentData = (await CovidPassportService.getAppointments(
+                    profileId
+                  )) as any;
+                  setRows(appointmentData);
+                }
+
+                loadRows(profile.id);
                 setSelectedProfile(profile);
               }}
               button
@@ -198,7 +245,10 @@ export default function Index() {
           </Link>
         </List>
       </Drawer>
-      <Typography variant="h3" className="centerText">
+      <Typography variant="h2" className="centerText" style={{margin:"50px"}}>
+                Covid Passport
+              </Typography>
+      <Typography variant="h4" className="centerText" style={{margin:'50px'}}>
         Results for {selectedProfile && selectedProfile.name}
       </Typography>
       <TableContainer component={Paper}>
@@ -207,24 +257,24 @@ export default function Index() {
             <TableRow>
               <StyledTableCell>Type</StyledTableCell>
               <StyledTableCell>Date</StyledTableCell>
-              <StyledTableCell align="right">Result</StyledTableCell>
+              <StyledTableCell align="right">Status</StyledTableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {rows &&
               rows.map((row, i) => (
-                <Link key={i} href={`/dashboard/qrcode/${row.id}`}>
+                <Link key={i} href={`/dashboard/qrcode/${row.date}`}>
                   <StyledTableRow key={row.type}>
                     <StyledTableCell component="th" scope="row">
                       {row.type}
                     </StyledTableCell>
                     <StyledTableCell component="th" scope="row">
-                      {row.date}
+                      {row.aptDate}
                     </StyledTableCell>
                     <StyledTableCell align="right">
                       <Chip
-                        className={getChipColorStyle(row.result)}
-                        label={row.result}
+                        className={getChipColorStyle(row.status)}
+                        label={row.status}
                       />
                     </StyledTableCell>
                   </StyledTableRow>
@@ -258,16 +308,9 @@ export default function Index() {
           left: 25px !important;
         }
       `}</style>
-      {/* <Box my={4}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Next.js with TypeScript example
-        </Typography>
-        <Link href="/about" color="secondary">
-          Go to the about page
-        </Link>
-        <ProTip />
-        <Copyright />
-      </Box> */}
-    </Container>
+
+    </div>
+      </div>
+
   );
 }

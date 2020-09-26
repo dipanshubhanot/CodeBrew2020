@@ -1,20 +1,25 @@
 import React from "react";
 import Container from "@material-ui/core/Container";
 import Typography from "@material-ui/core/Typography";
-import Box from "@material-ui/core/Box";
-import ProTip from "../src/ProTip";
 import Link from "next/link";
-import Copyright from "../src/Copyright";
 import CardHeader from "@material-ui/core/CardHeader";
 import CardContent from "@material-ui/core/CardContent";
 import Button from "@material-ui/core/Button";
 import CardActions from "@material-ui/core/CardActions";
 import Card from "@material-ui/core/Card";
 import TextField from "@material-ui/core/TextField";
-import * as firebase from "firebase";
 import Camera from "react-html5-camera-photo";
-
-export default function Index(props: any) {
+import CovidPassportService from "../../../services/CovidPassportService";
+import { makeStyles, withStyles } from "@material-ui/core/styles";
+import Header from "../../../src/components/Header/Header.js";
+import Footer from "../../../src/components/Footer/Footer.js";
+import GridContainer from "../../../src/components/Grid/GridContainer.js";
+import GridItem from "../../../src/components/Grid/GridItem.js";
+// import Button from "../../../src/components/CustomButtons/Button.js";
+import HeaderLinks from "../../../src/components/Header/HeaderLinks.js";
+import Parallax from "../../../src/components/Parallax/Parallax.js";
+import styles from "../../../src/assets/jss/material-kit-react/views/landingPage.js";
+export default function Index() {
   const [name, setName] = React.useState("");
   const [photo, setPhoto] = React.useState("");
 
@@ -23,13 +28,38 @@ export default function Index(props: any) {
     setPhoto(dataUri);
   };
 
-  return (
-    <Container maxWidth="sm">
-      <Typography variant="h3" className="centerText">
+  const submit = async () => {
+    const result = await CovidPassportService.createProfile(photo, name);
+    if (!result) {
+      setName("");
+      setPhoto("");
+    }
+  };
+  // card animation
+ const [cardAnimaton, setCardAnimation] = React.useState("cardHidden");
+ setTimeout(function() {
+   setCardAnimation("");
+ }, 700);
+ const useStyles = makeStyles(styles);
+ const classes = useStyles();
+return(
+    <div
+    className={classes.pageHeader}
+        style={{
+          backgroundImage: "url(" + "/bg7.jpg" + ")",
+          backgroundSize: "cover",
+          backgroundPosition: "top center",
+          height:"100vh",
+          margin:"0px 0"
+          
+        }}
+    >
+    <div className={classes.container} >
+      <Typography variant="h3" className="centerText" style={{margin:"25px"}}>
         Covid Passport
       </Typography>
-      <Card>
-        <CardHeader title="Add Profile" />
+      <Card style={{padding:"20px", backgroundColor:"rgba(0,0,0,1)"}}>
+        <CardHeader title="Add Profile of a Family Member" />
         <CardContent>
           <TextField
             fullWidth
@@ -39,14 +69,19 @@ export default function Index(props: any) {
             }}
             margin="normal"
             id="name"
-            label="Name"
+            label="Name of Person"
             variant="outlined"
+            color="primary"
+            autoFocus="true"
+            style={{
+              color:"#fff"
+            }}
           />
 
           {photo ? (
-            <img style={{ width: "100%" }} src={photo}></img>
+            <img style={{ width: "100%", padding:"20px" }} src={photo}></img>
           ) : (
-            <Camera onTakePhoto={takePhoto} />
+            <Camera sizeFactor={0.5} style={{ width: "100%", margin:"20px", padding:"20px" }} onTakePhoto={takePhoto} />
           )}
         </CardContent>
         <CardActions>
@@ -56,7 +91,7 @@ export default function Index(props: any) {
             </Button>
           </Link>
           <Link href="/dashboard">
-            <Button variant="contained" color="primary">
+            <Button onClick={submit} variant="contained" color="primary">
               Send
             </Button>
           </Link>
@@ -67,16 +102,8 @@ export default function Index(props: any) {
           text-align: center;
         }
       `}</style>
-      {/* <Box my={4}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Next.js with TypeScript example
-        </Typography>
-        <Link href="/about" color="secondary">
-          Go to the about page
-        </Link>
-        <ProTip />
-        <Copyright />
-      </Box> */}
-    </Container>
+
+    </div>
+    </div>
   );
 }

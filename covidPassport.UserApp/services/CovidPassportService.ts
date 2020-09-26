@@ -1,13 +1,38 @@
 import axios from "axios";
+import { resolve } from "path";
 
 class CovidService {
   private url: string;
+  private uid: string;
 
   constructor() {
     this.url = "http://localhost:8080";
+    this.uid = "";
   }
 
   public getProfiles() {
+    return axios
+      .get(`${this.url}/profile`, {
+        headers: {
+          uid: window.sessionStorage.getItem("uid"),
+        },
+      })
+      .then((response) => {
+        return response.data.map((profile) => {
+          const id = Object.keys(profile)[0];
+          const image = profile[id].image;
+          const name = profile[id].name;
+
+          return {
+            id,
+            image,
+            name,
+          };
+        });
+      })
+      .catch((err) => {
+        console.error(err);
+      });
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         resolve([
@@ -22,6 +47,8 @@ class CovidService {
   }
 
   public login(uid: string): Promise<void> {
+    window.sessionStorage.setItem("uid", uid);
+    console.log("setting uid " + uid);
     console.log("posting login with uid " + uid);
     return new Promise((resolve, reject) => {
       axios
@@ -34,7 +61,30 @@ class CovidService {
     });
   }
 
+  addAppointment(profile: any, type: string) {
+    return axios
+      .post(`${this.url}/appointment`, {
+        ...profile,
+        type,
+        date: new Date(),
+        aptDate: new Date(),
+        status: "pending",
+      })
+      .then(() => {
+        return;
+      })
+      .catch((err) => {
+        console.error(err);
+        return;
+      });
+  }
+
   public getAppointments(profileId: string) {
+    return axios
+      .get(`${this.url}/appointment?requirement=profile&profileId=${profileId}`)
+      .then((response) => {
+        return JSON.parse(response.data);
+      });
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         const rows = [
@@ -81,7 +131,38 @@ class CovidService {
     });
   }
 
+  public createProfile(image: string, name: string) {
+    return axios
+      .post(
+        `${this.url}/profile`,
+        {
+          image,
+          name,
+        },
+        {
+          headers: {
+            uid: window.sessionStorage.getItem("uid"),
+          },
+        }
+      )
+      .then((response) => {
+        return response.data;
+      })
+      .catch(() => {
+        console.error("Error creating profile");
+        return null;
+      });
+  }
+
   public verifyScan(code: string) {
+    return axios
+      .get(`${this.url}/scanner/qrscan?aID=${code}`)
+      .then((response) => {
+        return response.data;
+      })
+      .catch((err) => {
+        console.log(err);
+      });
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         resolve({

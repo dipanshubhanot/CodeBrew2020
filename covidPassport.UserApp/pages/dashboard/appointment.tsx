@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Container from "@material-ui/core/Container";
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
 import ProTip from "../src/ProTip";
 import Link from "next/link";
+import { makeStyles, withStyles } from "@material-ui/core/styles";
+
 import Copyright from "../src/Copyright";
 import CardHeader from "@material-ui/core/CardHeader";
 import CardContent from "@material-ui/core/CardContent";
@@ -16,17 +18,70 @@ import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import Select from "@material-ui/core/Select";
 import { FormControl } from "@material-ui/core";
+import CovidPassportService from "../../services/CovidPassportService";
+import { useRouter } from "next/router";
+import Header from "../../src/components/Header/Header.js";
+import Footer from "../../src/components/Footer/Footer.js";
+import GridContainer from "../../src/components/Grid/GridContainer.js";
+import GridItem from "../../src/components/Grid/GridItem.js";
+// import Button from "../../../src/components/CustomButtons/Button.js";
+import HeaderLinks from "../../src/components/Header/HeaderLinks.js";
+import Parallax from "../../src/components/Parallax/Parallax.js";
+import styles from "../../src/assets/jss/material-kit-react/views/landingPage.js";
+
+
+
 
 export default function Appointment() {
-  const [type, setType] = React.useState("");
+  const router = useRouter();
+  const [type, setType] = useState("");
+  const [profile, setProfile] = useState("");
+  const [profiles, setProfiles] = useState<any[]>([]);
+  const [created, setCreated] = useState<boolean>(false);
 
+  useEffect(() => {
+    const getProfiles = async () => {
+      const profiles = await CovidPassportService.getProfiles();
+      console.log(profiles);
+      setProfiles(profiles);
+    };
+
+    getProfiles();
+  }, []);
+
+  const send = async () => {
+    await CovidPassportService.addAppointment(
+      profiles.find((currProfile) => currProfile.id === profile),
+      type
+    );
+    router.push("/dashboard");
+  };
+ // card animation
+ const [cardAnimaton, setCardAnimation] = React.useState("cardHidden");
+ setTimeout(function() {
+   setCardAnimation("");
+ }, 700);
+ const useStyles = makeStyles(styles);
+ const classes = useStyles();
   return (
-    <Container maxWidth="sm">
-      <Typography variant="h2" className="centerText">
+    <div
+    className={classes.pageHeader}
+        style={{
+          backgroundImage: "url(" + "/bg7.jpg" + ")",
+          backgroundSize: "cover",
+          backgroundPosition: "top center",
+          height:"100vh",
+          margin:"0px 0"
+          
+        }}
+    >
+      <Typography variant="h2" className="centerText" style={{margin:"0px", color:"#fff", padding:"30px"}}>
         Covid Passport
       </Typography>
+      <div className={classes.container} >
+
       <Card>
-        <CardHeader title="Add Appointment" />
+        <CardHeader title="Add Appointment for Your Family" />
         <CardContent>
           <FormControl fullWidth>
             <InputLabel id="profile">Profile</InputLabel>
@@ -34,13 +89,15 @@ export default function Appointment() {
               fullWidth
               labelId="profile"
               id="demo-simple-select"
-              value={type}
+              value={profile}
               onChange={(e: any) => {
-                setType(e.target.value);
+                console.log(e.target.value);
+                setProfile(e.target.value);
               }}
             >
-              <MenuItem value={"covid-test"}>Profile 1</MenuItem>
-              <MenuItem value={"covid-vaccine"}>Profile 2</MenuItem>
+              {profiles.map((profile) => (
+                <MenuItem value={profile.id}>{profile.name}</MenuItem>
+              ))}
             </Select>
           </FormControl>
           <FormControl fullWidth>
@@ -56,8 +113,8 @@ export default function Appointment() {
                 setType(e.target.value);
               }}
             >
-              <MenuItem value={"covid-test"}>Covid Test</MenuItem>
-              <MenuItem value={"covid-vaccine"}>Covid Vaccine</MenuItem>
+              <MenuItem value={"Covid test"}>Covid Test</MenuItem>
+              <MenuItem value={"Covid vaccine"}>Covid Vaccine</MenuItem>
             </Select>
           </FormControl>
         </CardContent>
@@ -67,7 +124,7 @@ export default function Appointment() {
               Back
             </Button>
           </Link>
-          <Button variant="contained" color="primary" onClick={() => {}}>
+          <Button onClick={send} variant="contained" color="primary">
             Send
           </Button>
         </CardActions>
@@ -87,6 +144,7 @@ export default function Appointment() {
         <ProTip />
         <Copyright />
       </Box> */}
-    </Container>
+    </div >
+      </div>
   );
 }
