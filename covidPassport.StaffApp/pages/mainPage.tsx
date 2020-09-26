@@ -94,7 +94,7 @@ export default function MainPage() {
                 }
             );
         }
-        makeGetRequest('http://localhost:8080/appointment?requirement=pending');
+        makeGetRequest('https://todo-h3gj3loe2q-uc.a.run.app/appointment?requirement=pending');
     }, [])
 
 
@@ -148,7 +148,7 @@ export default function MainPage() {
                                     return currentRow.name.toUpperCase().includes(selectedQuery.toUpperCase())
 
                                 } else if(selectedResult == "date"){
-                                    return currentRow.apptDate.includes(selectedQuery)
+                                    return currentRow.aptDate.includes(selectedQuery)
                                 }
                         }).map((row,i) => (
                             //<Link href={`/dashboard/${row.id}`}>

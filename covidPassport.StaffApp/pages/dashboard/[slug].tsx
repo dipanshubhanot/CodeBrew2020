@@ -113,7 +113,7 @@ export default function About() {
 
     const onClickUpdate = (res) => {
         if(status == "pending"){
-            axios.post('http://localhost:8080/medical_practitioner/updatetestresults', {
+            axios.post('https://todo-h3gj3loe2q-uc.a.run.app/medical_practitioner/updatetestresults', {
                     aid: date,
                     status: "complete",
                     result: res
@@ -125,7 +125,7 @@ export default function About() {
                 .catch(err => {
                     console.log('error in request', err);
                 });
-            axios.post('http://localhost:8080/administerVaccine', {
+            axios.post('https://todo-h3gj3loe2q-uc.a.run.app/administerVaccine', {
                     profile_id: profile,
                     HR: selectedHR,
                     SPO2: selectedO2,
@@ -141,7 +141,7 @@ export default function About() {
                 });
 
         } else{
-            axios.post('http://localhost:8080/vaccine/newLog', {
+            axios.post('https://todo-h3gj3loe2q-uc.a.run.app/vaccine/newLog', {
                     profile_id: profile,
                     HR: selectedHR,
                     SPO2: selectedO2,
@@ -178,7 +178,7 @@ export default function About() {
                 }
             );
         }
-        makeGetRequest('http://localhost:8080/vaccineLogData/profile?profile_id='+profile);
+        makeGetRequest('https://todo-h3gj3loe2q-uc.a.run.app/vaccineLogData/profile?profile_id='+profile);
     }, [])
 
     return (

@@ -116,7 +116,7 @@ export default function Log() {
                 }
             );
         }
-        makeGetRequest('http://localhost:8080/appointment?requirement=everything');
+        makeGetRequest('https://todo-h3gj3loe2q-uc.a.run.app/appointment?requirement=everything');
     }, [])
 
 
@@ -159,7 +159,7 @@ export default function Log() {
                                     return currentRow.name.toUpperCase().includes(selectedQuery.toUpperCase())
 
                                 } else if(selectedResult == "date"){
-                                    return currentRow.apptDate.includes(selectedQuery)
+                                    return currentRow.aptDate.includes(selectedQuery)
                                 }
 
 
@@ -170,7 +170,7 @@ export default function Log() {
                                     {row.name}
                                 </StyledTableCell>
                                 <StyledTableCell component="th" scope="row">
-                                    {row.apptDate}
+                                    {row.aptDate}
                                 </StyledTableCell>
                                 <StyledTableCell align="right">
                                     <Chip
