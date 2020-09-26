@@ -5,6 +5,7 @@ import os, json, base64
 from flask import Flask, request, jsonify, render_template
 from firebase_admin import credentials, firestore, initialize_app, auth
 from flask_bcrypt import Bcrypt
+from datetime import datetime
 
 # Initialize Flask App
 app = Flask(__name__)
@@ -15,6 +16,7 @@ cred = credentials.Certificate("key.json")
 default_app = initialize_app(cred)
 db = firestore.client()
 accounts = db.collection('Accounts')
+appointments = db.collection('Appointments')
 
 current_user = None
 
@@ -102,6 +104,7 @@ def accountCheck(email):
 def index():
     return render_template('index.html')
 
+
 '''
 @app.route('/register', methods=['POST'])
 def register():
@@ -118,7 +121,8 @@ def register():
         return f"An Error Occured: {e}"
 '''
 
-@app.route('/profile', methods=['GET','POST'])
+
+@app.route('/profile', methods=['GET', 'POST'])
 def profile():
     print("in profile")
     accID = get_user_info(current_user)['email']
@@ -128,29 +132,32 @@ def profile():
             #accID = get_user_info(current_user)['email']
             #print(request.json)
             #accID = 'vaishnavi@gmail.com'  
+
             profileCount = accounts.document(accID).get().to_dict()["profile_count"]
             profileID = genProfileID(accID, profileCount)
             print(profileID)
             profileDict = {}
             profileDict[profileID] = request.json
-            
+
             print(json.dumps(profileDict))
             accounts.document(accID).update({u"profiles": firestore.ArrayUnion([profileDict])})
-            
+
             accounts.document(accID).update({"profile_count": firestore.Increment(1)})
-            
+
             return jsonify({"success": True}), 200
         except Exception as e:
             print("ERRORR!!")
             return f"An Error Occured: {e}"
+
     if request.method == "GET":
         try:
             accountDetails = accounts.document(accID).get().to_dict()
             print(accountDetails["profiles"])
             return jsonify(accountDetails["profiles"]), 200
-            
+
         except Exception as e:
             return f"An Error Occured: {e}"
+
 
 '''
 @app.route('/list', methods=['GET'])
@@ -204,10 +211,50 @@ def delete():
         return f"An Error Occured: {e}"
 '''
 
-def genProfileID(accID,profileCount):
-    unhashedID = accID + '-' + str(profileCount) #replace 2 with counter based on no. of profiles
+
+
+@app.route('/appointment', methods=["POST", "GET"])
+def appointment():
+    if request.method == "POST":
+        date_time = datetime.now()
+        appointments.document(str(date_time)).set(request.json)
+        return jsonify({"success": True}), 200
+
+    if request.method == "GET":
+        appointment_list = []
+        appointment_documents = appointments.get()
+
+        for appointment_doc in appointment_documents:
+            appointment_dict = appointment_doc.to_dict()
+
+            # return the appointments associated with the requested profileID
+            if request.json["requirement"] == "profile":
+                if appointment_dict["profileID"] == request.json["profileID"]:
+                    appointment_list.append(appointment_dict)
+
+            # return all the pending appointments
+            if request.json["requirement"] == "pending":
+                if appointment_dict["status"] == "pending":
+                    appointment_list.append(appointment_dict)
+
+            # return all the COVID - test appointments
+            if request.json["requirement"] == "test":
+                if appointment_dict["type"] == "test":
+                    appointment_list.append(appointment_dict)
+
+            # return all the COVID - vaccine appointments
+            if request.json["requirement"] == "vaccine":
+                if appointment_dict["type"] == "vaccine":
+                    appointment_list.append(appointment_dict)
+
+        return jsonify(json.dumps(appointment_list)), 200
+
+
+
+def genProfileID(accID, profileCount):
+    unhashedID = accID + '-' + str(profileCount)  # replace 2 with counter based on no. of profiles
     hashedID = bcrypt.generate_password_hash(unhashedID)
-    return hashedID.decode("utf-8").replace('/','')
+    return hashedID.decode("utf-8").replace('/', '')
 
 
 port = int(os.environ.get('PORT', 8080))
