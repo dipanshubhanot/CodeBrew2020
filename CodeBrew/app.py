@@ -330,13 +330,13 @@ def administer_vaccine():
             "message": "Not a Post Request"
         }
     data = request.get_json()
-    if 'HR' in data and 'SPO2' in data and 'profileid' in data:
+    if 'HR' in data and 'SPO2' in data and 'profile_id' in data:
         record = {
-            u'Date of Administration': datetime.datetime.now(),
+            u'Date of Administration': datetime.now(),
             u'Heart Rate at Administration': data['HR'],
             u'SP02 at Administration': data['SPO2'],
         }
-        docid = data['profileid']
+        docid = data['profile_id']
         new_vaccine_record(docid, record)
         return "Successfully Created Vaccine Records"
     else:
@@ -358,7 +358,7 @@ def add_vaccine_log():
     data = request.get_json()
     if 'HR' in data and 'SPO2' in data and 'profile_id' in data:
         record = {
-            u'Date': datetime.datetime.now(),
+            u'Date': datetime.now(),
             u'Heart Rate': data['HR'],
             u'SP02': data['SPO2'],
         }
