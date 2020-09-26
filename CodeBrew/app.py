@@ -219,7 +219,6 @@ def delete():
 '''
 
 
-
 @app.route('/appointment', methods=["POST", "GET"])
 def appointment():
     if request.method == "POST":
@@ -262,7 +261,37 @@ def appointment():
 
         return jsonify(json.dumps(appointment_list)), 200
 
+#for scanner
+@app.route('/scanner/qrscan',methods=["GET"])
+def qrScan():
+    if request.method == "GET":
+        try:
+            appointmentID = request.json['aID']
+            appointment = appointments.document(appointmentID).get().to_dict()
+            return jsonify(appointment), 200
+        except Exception as e:
+            print("An Error Occured: {e}")
 
+#for medical practitioner
+@app.route('/medical_practitioner/updatetestresults',methods=["POST"])
+def updateTestStatus():
+    if request.method == "POST":
+        try:
+            appointmentID = request.json["aid"]
+            status = request.json["status"]
+            result = request.json["result"]
+            appointment_ref = appointments.document(appointmentID)
+            
+            #update status
+            appointment_ref.update({"status": status})
+
+            #update result
+            appointment_ref.update({"result": result})
+            
+            return jsonify({"success": True}), 200
+
+        except Exception as e:
+            print("An Error Occured: {e}")
 
 def genProfileID(accID, profileCount):
     unhashedID = accID + '-' + str(profileCount)  # replace 2 with counter based on no. of profiles
