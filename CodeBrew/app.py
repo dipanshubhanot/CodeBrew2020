@@ -3,7 +3,7 @@
 # Required Imports
 import os, json, base64
 from flask import Flask, request, jsonify, render_template
-from firebase_admin import credentials, firestore, initialize_app
+from firebase_admin import credentials, firestore, initialize_app, auth
 from flask_bcrypt import Bcrypt
 
 # Initialize Flask App
@@ -16,17 +16,93 @@ default_app = initialize_app(cred)
 db = firestore.client()
 accounts = db.collection('Accounts')
 
+current_user = None
+
+def get_user_info(user):
+    """
+    Documentation:
+    https://firebase.google.com/docs/reference/admin/python/firebase_admin.auth#firebase_admin.auth.UserRecord
+    :param user: firebase_admin.auth.UserRecord Object
+    :return: Dictionary of attributes for the user
+    """
+    if not user:
+        return None
+    else:
+        return {
+            'name': user.display_name,
+            'email': user.email,
+            'metadata': user.user_metadata,
+            'image': user.photo_url
+        }
+
+class InvalidUID(Exception):
+    """
+        Exception Class to be raised if the UID provided by the request is invalid
+    """
+    def __init__(self, message, status_code=None, payload=None):
+        Exception.__init__(self)
+        self.message = message
+        if status_code is not None:
+            self.status_code = status_code
+        self.payload = {
+            'message': self.message,
+            'status_code': 200
+        }
+
+@app.errorhandler(InvalidUID)
+def handle_invalid_uid(error):
+    """
+    handling Invlaid UID exception
+    :param error: Invalid UID exception
+    :return: Response for the error
+    """
+    response = jsonify(error.payload)
+    return response
+
+
+@app.route('/login', methods=['POST'])
+def verify_login():
+    """
+    Handles the senduser request which will fetch the current user from firebase
+    :return:
+    """
+    if request.method != "POST":
+        return {
+            "message": "Not a Post Request"
+        }
+
+    data = request.get_json()
+    if 'uid' in data:
+        global current_user
+        current_user = auth.get_user(data['uid'], default_app)
+        email = get_user_info(current_user)['email']
+        
+        #add account document to db if not present
+        if not accountCheck(email):
+            nameDict = {}
+            nameDict["name"] = get_user_info(current_user)['name']
+            nameDict["profile_count"] = 0
+            nameDict["profiles"] = []
+            accounts.document(email).set(nameDict)
+         
+        print(get_user_info(current_user))
+        return {
+            "message": "Request Successful",
+            "status_code": 500
+        }
+    else:
+        raise InvalidUID("The provided UID is invalid")
+
+def accountCheck(email):
+    email = get_user_info(current_user)['email']
+    return accounts.document(email).get().exists()
+
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/login',methods=['POST','GET'])
-def login():
-    email = request.json['email']
-    
-    return render_template('index.html')
-
+'''
 @app.route('/register', methods=['POST'])
 def register():
     """
@@ -40,17 +116,18 @@ def register():
         return jsonify({"success": True}), 200
     except Exception as e:
         return f"An Error Occured: {e}"
-
+'''
 
 @app.route('/profile', methods=['GET','POST'])
 def profile():
     print("in profile")
+    accID = get_user_info(current_user)['email']
     if request.method == 'POST':
         try:
             # Check if ID was passed to URL query
-            #accID = request.json['accountID']
+            #accID = get_user_info(current_user)['email']
             #print(request.json)
-            accID = 'vaishnavi@gmail.com'  
+            #accID = 'vaishnavi@gmail.com'  
             profileCount = accounts.document(accID).get().to_dict()["profile_count"]
             profileID = genProfileID(accID, profileCount)
             print(profileID)
@@ -67,7 +144,6 @@ def profile():
             print("ERRORR!!")
             return f"An Error Occured: {e}"
     if request.method == "GET":
-        accID = "vaishnavi@gmail.com"
         try:
             accountDetails = accounts.document(accID).get().to_dict()
             print(accountDetails["profiles"])
@@ -76,7 +152,7 @@ def profile():
         except Exception as e:
             return f"An Error Occured: {e}"
 
-
+'''
 @app.route('/list', methods=['GET'])
 def read():
     """
@@ -126,7 +202,7 @@ def delete():
         return jsonify({"success": True}), 200
     except Exception as e:
         return f"An Error Occured: {e}"
-
+'''
 
 def genProfileID(accID,profileCount):
     unhashedID = accID + '-' + str(profileCount) #replace 2 with counter based on no. of profiles
