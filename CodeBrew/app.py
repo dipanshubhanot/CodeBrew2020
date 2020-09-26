@@ -21,7 +21,6 @@ db = firestore.client()
 accounts = db.collection('Accounts')
 appointments = db.collection('Appointments')
 
-current_user = None
 
 def get_user_info(user):
     """
@@ -94,12 +93,12 @@ def verify_login():
         print(get_user_info(current_user))
         return {
             "message": "Request Successful",
-            "status_code": 500
+            "status_code": 200
         }
     else:
         raise InvalidUID("The provided UID is invalid")
 
-def accountCheck(email):
+def accountCheck(current_user):
     email = get_user_info(current_user)['email']
     return accounts.document(email).get().exists
 
@@ -129,7 +128,8 @@ def register():
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
     print("in profile")
-    accID = get_user_info(current_user)['email']
+    uID = request.headers['uid']
+    accID = get_user_info(uID)['email']
     if request.method == 'POST':
         try:
             # Check if ID was passed to URL query
@@ -228,7 +228,7 @@ def appointment():
 
     if request.method == "GET":
         appointment_list = []
-        appointment_documents = appointments.get()
+        appointment_documents = appointments.get() 
 
         for appointment_doc in appointment_documents:
             appointment_dict = appointment_doc.to_dict()
