@@ -121,7 +121,9 @@ export default function Index() {
         setRows(appointmentData);
       }
 
-      loadRows(selectedProfile.id);
+      if (selectedProfile) {
+        loadRows(selectedProfile.id);
+      }
     }
 
     loadProfiles();

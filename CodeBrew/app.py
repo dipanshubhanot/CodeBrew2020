@@ -7,6 +7,7 @@ from firebase_admin import credentials, firestore, initialize_app, auth
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from datetime import datetime
+import uuid
 
 # Initialize Flask App
 app = Flask(__name__)
@@ -53,6 +54,31 @@ class InvalidUID(Exception):
             'status_code': 200
         }
 
+class API_KEY_EXCEPTION(Exception):
+    """
+        Exception Class to be raised if the UID provided by the request is invalid
+    """
+
+    def __init__(self, message, status_code=None, payload=None):
+        Exception.__init__(self)
+        self.message = message
+        if status_code is not None:
+            self.status_code = status_code
+        self.payload = {
+            'message': self.message,
+            'status_code': 200
+        }
+
+@app.errorhandler(API_KEY_EXCEPTION)
+def handle_invalid_api(error):
+    """
+    handling Invlaid API exception
+    :param error: Invalid API exception
+    :return: Response for the error
+    """
+    response = jsonify(error.payload)
+    return response
+
 @app.errorhandler(InvalidUID)
 def handle_invalid_uid(error):
     """
@@ -77,13 +103,12 @@ def verify_login():
 
     data = request.get_json()
     if 'uid' in data:
-        global current_user
         current_user = auth.get_user(data['uid'], default_app)
         email = get_user_info(current_user)['email']
         
         print(email)
         #add account document to db if not present
-        if not accountCheck(email):
+        if not accountCheck(current_user):
             nameDict = {}
             nameDict["name"] = get_user_info(current_user)['name']
             nameDict["profile_count"] = 0
@@ -129,7 +154,9 @@ def register():
 def profile():
     print("in profile")
     uID = request.headers['uid']
-    accID = get_user_info(uID)['email']
+    print(uID)
+    current_user = auth.get_user(uID, default_app)
+    accID = get_user_info(current_user)['email']
     if request.method == 'POST':
         try:
             # Check if ID was passed to URL query
@@ -143,7 +170,7 @@ def profile():
             profileDict = {}
             profileDict[profileID] = request.json
 
-            print(json.dumps(profileDict))
+            # print(json.dumps(profileDict))
             accounts.document(accID).update({u"profiles": firestore.ArrayUnion([profileDict])})
 
             accounts.document(accID).update({"profile_count": firestore.Increment(1)})
@@ -151,12 +178,14 @@ def profile():
             return jsonify({"success": True}), 200
         except Exception as e:
             print("ERRORR!!")
-            return f"An Error Occured: {e}"
+            print(e)
+            return jsonify({"success": False}), 500
+            return;
 
     if request.method == "GET":
         try:
             accountDetails = accounts.document(accID).get().to_dict()
-            print(accountDetails["profiles"])
+            # print(accountDetails["profiles"])
             return jsonify(accountDetails["profiles"]), 200
 
         except Exception as e:
@@ -215,13 +244,12 @@ def delete():
         return f"An Error Occured: {e}"
 '''
 
-
-
 @app.route('/appointment', methods=["POST", "GET"])
 def appointment():
     if request.method == "POST":
         date_time = datetime.now()
-        appointments.document(str(date_time)).set(request.json)
+        request.json["date"] = date_time.timestamp()
+        appointments.document(str(date_time.timestamp())).set(request.json)
         return jsonify({"success": True}), 200
 
     if request.method == "GET":
@@ -232,32 +260,177 @@ def appointment():
             appointment_dict = appointment_doc.to_dict()
 
             # return the appointments associated with the requested profileID
-            if request.json["requirement"] == "profile":
-                if appointment_dict["profileID"] == request.json["profileID"]:
-                    appointment_list.append(appointment_dict)
+            if request.args.get('requirement') == "profile":
+                if "id" in appointment_dict:
+                    if appointment_dict["id"] == request.args.get('profileId'):
+                        appointment_list.append(appointment_dict)
 
             # return all the pending appointments
-            if request.json["requirement"] == "pending":
+            if request.args.get('requirement') == "pending":
                 if appointment_dict["status"] == "pending":
                     appointment_list.append(appointment_dict)
 
-            # return ALL appointments
-            if request.json["requirement"] == "everything":
+            # return all the pending appointments
+            if request.args.get('requirement') == "everything":
                 if appointment_dict["status"] == "complete":
                     appointment_list.append(appointment_dict)
 
             # return all the COVID - test appointments
-            if request.json["requirement"] == "test":
+            if request.args.get('requirement') == "test":
                 if appointment_dict["type"] == "test":
                     appointment_list.append(appointment_dict)
 
             # return all the COVID - vaccine appointments
-            if request.json["requirement"] == "vaccine":
+            if request.args.get('requirement') == "vaccine":
                 if appointment_dict["type"] == "vaccine":
                     appointment_list.append(appointment_dict)
 
         return jsonify(json.dumps(appointment_list)), 200
 
+#for scanner
+@app.route('/scanner/qrscan',methods=["GET"])
+def qrScan():
+    if request.method == "GET":
+        try:
+            appointmentID = request.args.get('aID')
+            appointment = appointments.document(appointmentID).get().to_dict()
+            return jsonify(appointment), 200
+        except Exception as e:
+            print("An Error Occured: {e}")
+
+#for medical practitioner
+@app.route('/medical_practitioner/updatetestresults',methods=["POST"])
+def updateTestStatus():
+    if request.method == "POST":
+        try:
+            appointmentID = request.json["aid"]
+            status = request.json["status"]
+            result = request.json["result"]
+            appointment_ref = appointments.document(appointmentID)
+            
+            #update status
+            appointment_ref.update({"status": status})
+
+            #update result
+            appointment_ref.update({"result": result})
+            
+            return jsonify({"success": True}), 200
+
+        except Exception as e:
+            print("An Error Occured: {e}")
+
+def get_profile_id(profile):
+    return "HelloWorld" + str(profile)
+
+
+@app.route('/administerVaccine', methods=['POST'])
+def administer_vaccine():
+    if request.method != "POST":
+        return {
+            "message": "Not a Post Request"
+        }
+    data = request.get_json()
+    if 'HR' in data and 'SPO2' in data and 'profile_id' in data:
+        record = {
+            u'Date of Administration': datetime.now(),
+            u'Heart Rate at Administration': data['HR'],
+            u'SP02 at Administration': data['SPO2'],
+        }
+        docid = data['profile_id']
+        new_vaccine_record(docid, record)
+        return "Successfully Created Vaccine Records"
+    else:
+        raise InvalidUID("Enough Info not provided")
+
+
+def new_vaccine_record(docid, record):
+    db = firestore.client()
+    db.collection(u'VaccineLog').document(docid).set(record)
+
+
+@app.route('/vaccine/newLog', methods=['POST'])
+def add_vaccine_log():
+    if request.method != "POST":
+        return {
+            "message": "Not a Post Request"
+        }
+
+    data = request.get_json()
+    if 'HR' in data and 'SPO2' in data and 'profile_id' in data:
+        record = {
+            u'Date': datetime.now(),
+            u'Heart Rate': data['HR'],
+            u'SP02': data['SPO2'],
+        }
+        docid = data['profile_id']
+        new_vaccine_log(docid, record)
+        return "Successfully Created Vaccine Log"
+    else:
+        raise InvalidUID("Enough Info not provided")
+
+
+def new_vaccine_log(docid, record):
+    db = firestore.client()
+    db.collection(u'VaccineLog').document(docid).collection(u'Logs').document(
+        str(record['Date'])).set(record)
+    return None
+
+
+@app.route('/vaccineLogData/profile', methods=['GET'])
+def give_profile_log():
+    if 'profile_id' in request.headers:
+        profile_id = request.headers.get('profile_id')
+        return get_profile_log(profile_id)
+    else:
+        raise InvalidUID('Helllooo')
+
+
+def get_profile_log(profile_id):
+    db = firestore.client()
+    profile_ref = db.collection(u'VaccineLog').document(profile_id)
+    profile_data = profile_ref.get()
+    user_data = dict()
+    if profile_data.exists:
+        user_data['VaccinationPoint'] = profile_data.to_dict()
+        user_data['PrevLog'] = []
+    else:
+        return "Invalid Profile ID"
+    for record in db.collection(u'VaccineLog').document(profile_id).collections():
+        for data in record.stream():
+            user_data['PrevLog'].append(data.to_dict())
+    return user_data
+
+
+@app.route('/api/vaccineLogData/', methods=['GET'])
+def fetch_log_data():
+    if 'apiKey' in request.headers:
+        if validate_api_key(request.headers.get('apiKey')):
+            return get_all_log()
+        else:
+            raise API_KEY_EXCEPTION('Invalid API Key')
+    else:
+        raise API_KEY_EXCEPTION('No API Key Provided')
+
+
+def validate_api_key(api):
+    db = firestore.client()
+    doc_ref = db.collection(u'apiKeys').document(api)
+    doc = doc_ref.get()
+    return doc.exists
+
+
+def get_all_log():
+    db = firestore.client()
+    docs = db.collection(u'VaccineLog').stream()
+    final_data = dict()
+    for doc in docs:
+        current_data = doc.to_dict()
+        final_data[doc.id] = current_data
+        final_data['record'] = []
+        for record in db.collection(u'VaccineLog').document(doc.id).collections():
+            for data in record.stream():
+                final_data['record'].append(data.to_dict())
+    return final_data
 
 
 def genProfileID(accID, profileCount):
