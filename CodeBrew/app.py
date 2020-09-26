@@ -5,10 +5,13 @@ import os, json, base64
 from flask import Flask, request, jsonify, render_template
 from firebase_admin import credentials, firestore, initialize_app, auth
 from flask_bcrypt import Bcrypt
+from flask_cors import CORS
 
 # Initialize Flask App
 app = Flask(__name__)
+CORS(app)
 bcrypt = Bcrypt(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 # Initialize Firestore DB
 cred = credentials.Certificate("key.json")
@@ -77,6 +80,7 @@ def verify_login():
         current_user = auth.get_user(data['uid'], default_app)
         email = get_user_info(current_user)['email']
         
+        print(email)
         #add account document to db if not present
         if not accountCheck(email):
             nameDict = {}
@@ -95,6 +99,7 @@ def verify_login():
 
 def accountCheck(email):
     email = get_user_info(current_user)['email']
+    # return True;
     return accounts.document(email).get().exists()
 
 
