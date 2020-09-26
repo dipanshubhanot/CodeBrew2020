@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<head>
+    <title>index</title>
+    <!-- <link rel="icon" type="image/x-icon" href="./assets/favicon.ico" /> -->
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <meta name="google-signin-client_id"
+          content="587209520782-bu3g4agf41d9vok7pg9ipudfa6igpq7c.apps.googleusercontent.com">
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <!-- <script>
+      gapi.auth2.init({
+      client_id: '587209520782-c7nqj30h5mkpdm0hlsh8vi86igo384l6.apps.googleusercontent.com'
+      })
+    
+    </script> -->
+    <script src="https://apis.google.com/js/platform.js?onload=onLoadCallback" async defer></script>
+    <script>
+        window.onLoadCallback = function () {
+            gapi.auth2.init({
+                client_id: '587209520782-bu3g4agf41d9vok7pg9ipudfa6igpq7c.apps.googleusercontent.com'
+            });
+        }
+    </script>
+</head>
+
+<body>
+<div class="g-signin2" data-onsuccess="onSignIn"></div>
+
+<script>
+    function onSignIn(googleUser) {
+        var id_token = googleUser.getAuthResponse().id_token;
+        //var xhr = new XMLHttpRequest();
+        // console.log('google-token:' + typeof id_token);
+
+        // var xhr = new XMLHttpRequest();
+        // xhr.withCredentials = true;
+        var data = JSON.stringify({'google-token': id_token});
+        var xhr = new XMLHttpRequest();
+        xhr.withCredentials = true;
+
+        xhr.addEventListener("readystatechange", function () {
+            if (this.readyState === 4) {
+                console.log(this.responseText);
+            }
+        });
+
+        xhr.open("POST", "http://localhost:5000/google-auth-token",true);
+        xhr.setRequestHeader("profile_id", "Deepanshu");
+        xhr.setRequestHeader("Content-Type", "application/json");
+
+        xhr.send(data);
+
+
+// var requestOptions = {
+//   method: 'POST',
+//   body: raw,
+//   redirect: 'follow'
+// };
+//
+// fetch("http://localhost:5000/google-auth-token", requestOptions)
+//   .then(response => response.text())
+//   .then(result => console.log(result))
+//   .catch(error => console.log('error', error));
+
+
+    }
+</script>
+
+
+</body>
+</html>

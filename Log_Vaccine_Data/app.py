@@ -2,7 +2,11 @@ import datetime
 
 import firebase_admin
 from firebase_admin import auth, credentials, firestore
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
+from google.auth.transport import requests
+from google.oauth2 import id_token
+
+GOOGLE_AUTH_CLIENT_ID = '587209520782-bu3g4agf41d9vok7pg9ipudfa6igpq7c.apps.googleusercontent.com'
 
 # Setting Up Firebase
 cred = credentials.Certificate("codebrew2020-firebase-adminsdk-bmi36-da4d53edf4.json")
@@ -74,6 +78,7 @@ def handle_invalid_uid(error):
     """
     response = jsonify(error.payload)
     return response
+
 
 @app.errorhandler(API_KEY_EXCEPTION)
 def handle_invalid_api(error):
@@ -223,6 +228,48 @@ def get_all_log():
                 final_data['record'].append(data.to_dict())
     return final_data
 
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/google-auth-token', methods=['POST'])
+def get_google_token():
+    payload2 = request.get_json()
+    print(payload2)
+    if 'google-token' in payload2:
+        token = payload2.get('google-token')
+        print(token)
+        if verify_google_token(token):
+            return "Nice!"
+        else:
+            return "Not Nice"
+    return "lolwa"
+
+# (Receive token by HTTPS POST)
+# ...
+
+def verify_google_token(token):
+    try:
+        # Specify the CLIENT_ID of the app that accesses the backend:
+        idinfo = id_token.verify_oauth2_token(token, requests.Request(), GOOGLE_AUTH_CLIENT_ID)
+
+        # Or, if multiple clients access the backend server:
+        # idinfo = id_token.verify_oauth2_token(token, requests.Request())
+        # if idinfo['aud'] not in [CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]:
+        #     raise ValueError('Could not verify audience.')
+
+        # If auth request is from a G Suite domain:
+        # if idinfo['hd'] != GSUITE_DOMAIN_NAME:
+        #     raise ValueError('Wrong hosted domain.')
+
+        # ID token is valid. Get the user's Google Account ID from the decoded token.
+        userid = idinfo['sub']
+        print(userid)
+        return True
+    except ValueError:
+        # Invalid token
+        return False
+
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
