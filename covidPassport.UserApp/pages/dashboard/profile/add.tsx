@@ -12,9 +12,16 @@ import CardActions from "@material-ui/core/CardActions";
 import Card from "@material-ui/core/Card";
 import TextField from "@material-ui/core/TextField";
 import * as firebase from "firebase";
+import Camera from "react-html5-camera-photo";
 
 export default function Index(props: any) {
   const [name, setName] = React.useState("");
+  const [photo, setPhoto] = React.useState("");
+
+  const takePhoto = (dataUri: string) => {
+    console.log(dataUri);
+    setPhoto(dataUri);
+  };
 
   return (
     <Container maxWidth="sm">
@@ -35,6 +42,12 @@ export default function Index(props: any) {
             label="Name"
             variant="outlined"
           />
+
+          {photo ? (
+            <img style={{ width: "100%" }} src={photo}></img>
+          ) : (
+            <Camera onTakePhoto={takePhoto} />
+          )}
         </CardContent>
         <CardActions>
           <Link href="/dashboard">

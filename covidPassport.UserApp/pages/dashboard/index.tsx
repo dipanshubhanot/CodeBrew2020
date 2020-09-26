@@ -29,51 +29,8 @@ import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import InboxIcon from "@material-ui/icons/MoveToInbox";
 import MailIcon from "@material-ui/icons/Mail";
-
-function createData(id: string, type: string, date: string, result: string) {
-  return { id, date, type, result };
-}
-
-const rows = [
-  createData(
-    "123sdjvweoirufsdoivjeoijt",
-    "Covid vaccine",
-    "2020/09/26",
-    "Active"
-  ),
-  createData(
-    "123sdjvweoirufsdoivjeoijt",
-    "Covid test",
-    "2020/09/25",
-    "Pending"
-  ),
-  createData(
-    "123sdjvweoirufsdoivjeoijt",
-    "Covid test",
-    "2020/09/03",
-    "Negative"
-  ),
-  createData(
-    "123sdjvweoirufsdoivjeoijt",
-    "Covid test",
-    "2020/08/20",
-    "Positive"
-  ),
-  createData(
-    "123sdjvweoirufsdoivjeoijt",
-    "Covid test",
-    "2020/08/03",
-    "Negative"
-  ),
-  createData(
-    "123sdjvweoirufsdoivjeoijt",
-    "Covid test",
-    "2020/07/22",
-    "Negative"
-  ),
-];
-
-const profiles = ["Profile 1", "Child 1", "Child 2"];
+import CovidPassportService from "../../services/CovidPassportService";
+import * as firebase from "firebase";
 
 const StyledTableCell = withStyles((theme) => ({
   head: {
@@ -94,8 +51,29 @@ const StyledTableRow = withStyles((theme) => ({
 }))(TableRow);
 
 export default function Index() {
+  const [profiles, setProfiles] = React.useState<any[]>([]);
   const [open, setOpen] = React.useState<boolean>(false);
-  const [selectedProfile, setSelectedProfile] = React.useState(profiles[0]);
+  const [selectedProfile, setSelectedProfile] = React.useState<any>(null);
+  const [rows, setRows] = React.useState<any[]>([]);
+
+  React.useEffect(() => {
+    var firebaseConfig = {
+      apiKey: "AIzaSyBHVA72kfKEln5gg4fENfg0EV8UvGtgP_M",
+      authDomain: "codebrew2020.firebaseapp.com",
+      databaseURL: "https://codebrew2020.firebaseio.com",
+      projectId: "codebrew2020",
+      storageBucket: "codebrew2020.appspot.com",
+      messagingSenderId: "587209520782",
+      appId: "1:587209520782:web:29e8bcaa080072ce75bbdf",
+      measurementId: "G-4MQ7ZD83ZD",
+    };
+
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+
+    console.log(firebase.auth().currentUser);
+  }, []);
 
   const getChipColorStyle = (status: string) => {
     switch (status) {
@@ -108,6 +86,27 @@ export default function Index() {
         return "background-blue";
     }
   };
+
+  React.useEffect(() => {
+    async function loadProfiles() {
+      const data = (await CovidPassportService.getProfiles()) as any;
+      console.log(data);
+      setProfiles(data || []);
+      const selectedProfile = data[0];
+      setSelectedProfile(selectedProfile);
+
+      async function loadRows(profileId: string) {
+        const appointmentData = (await CovidPassportService.getAppointments(
+          profileId
+        )) as any;
+        setRows(appointmentData);
+      }
+
+      loadRows(selectedProfile.id);
+    }
+
+    loadProfiles();
+  }, []);
 
   return (
     <Container maxWidth="sm">
@@ -144,18 +143,18 @@ export default function Index() {
         </div>
         <Divider />
         <List>
-          {profiles.map((text, index) => (
+          {profiles.map((profile, index) => (
             <ListItem
               onClick={() => {
-                setSelectedProfile(text);
+                setSelectedProfile(profile);
               }}
               button
-              key={text}
+              key={index}
             >
               <ListItemIcon>
                 {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
               </ListItemIcon>
-              <ListItemText primary={text} />
+              <ListItemText primary={profile.name} />
             </ListItem>
           ))}
         </List>
@@ -185,10 +184,22 @@ export default function Index() {
               <ListItemText primary={"Scan"} />
             </ListItem>
           </Link>
+          <Link href="/">
+            <ListItem
+              onClick={() => firebase.auth().signOut()}
+              button
+              key={"Logout"}
+            >
+              <ListItemIcon>
+                <InboxIcon />
+              </ListItemIcon>
+              <ListItemText primary={"Logout"} />
+            </ListItem>
+          </Link>
         </List>
       </Drawer>
-      <Typography variant="h2" className="centerText">
-        Results for {selectedProfile}
+      <Typography variant="h3" className="centerText">
+        Results for {selectedProfile && selectedProfile.name}
       </Typography>
       <TableContainer component={Paper}>
         <Table aria-label="customized table">
@@ -200,24 +211,25 @@ export default function Index() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row, i) => (
-              <Link href={`/dashboard/qrcode/${row.id}`}>
-                <StyledTableRow key={row.type}>
-                  <StyledTableCell component="th" scope="row">
-                    {row.type}
-                  </StyledTableCell>
-                  <StyledTableCell component="th" scope="row">
-                    {row.date}
-                  </StyledTableCell>
-                  <StyledTableCell align="right">
-                    <Chip
-                      className={getChipColorStyle(row.result)}
-                      label={row.result}
-                    />
-                  </StyledTableCell>
-                </StyledTableRow>
-              </Link>
-            ))}
+            {rows &&
+              rows.map((row, i) => (
+                <Link key={i} href={`/dashboard/qrcode/${row.id}`}>
+                  <StyledTableRow key={row.type}>
+                    <StyledTableCell component="th" scope="row">
+                      {row.type}
+                    </StyledTableCell>
+                    <StyledTableCell component="th" scope="row">
+                      {row.date}
+                    </StyledTableCell>
+                    <StyledTableCell align="right">
+                      <Chip
+                        className={getChipColorStyle(row.result)}
+                        label={row.result}
+                      />
+                    </StyledTableCell>
+                  </StyledTableRow>
+                </Link>
+              ))}
           </TableBody>
         </Table>
       </TableContainer>

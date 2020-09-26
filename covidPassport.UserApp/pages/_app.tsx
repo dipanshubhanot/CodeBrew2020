@@ -4,6 +4,7 @@ import { AppProps } from "next/app";
 import { ThemeProvider } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import theme from "../src/theme";
+import "react-html5-camera-photo/build/css/index.css";
 
 export default function MyApp(props: AppProps) {
   const { Component, pageProps } = props;
