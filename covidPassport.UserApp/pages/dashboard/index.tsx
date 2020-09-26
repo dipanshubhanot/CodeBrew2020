@@ -169,6 +169,22 @@ export default function Index() {
               <ListItemText primary={"Add Appointment "} />
             </ListItem>
           </Link>
+          <Link href="/dashboard/profile/add">
+            <ListItem button key={"Add Profile"}>
+              <ListItemIcon>
+                <InboxIcon />
+              </ListItemIcon>
+              <ListItemText primary={"Add Profile"} />
+            </ListItem>
+          </Link>
+          <Link href="/dashboard/scan">
+            <ListItem button key={"Scan"}>
+              <ListItemIcon>
+                <InboxIcon />
+              </ListItemIcon>
+              <ListItemText primary={"Scan"} />
+            </ListItem>
+          </Link>
         </List>
       </Drawer>
       <Typography variant="h2" className="centerText">

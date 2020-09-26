@@ -15,6 +15,7 @@ import * as firebase from "firebase";
 import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import Select from "@material-ui/core/Select";
+import { FormControl } from "@material-ui/core";
 
 export default function Appointment() {
   const [type, setType] = React.useState("");
@@ -27,21 +28,38 @@ export default function Appointment() {
       <Card>
         <CardHeader title="Add Appointment" />
         <CardContent>
-          <InputLabel id="demo-simple-select-label">
-            Appointment type
-          </InputLabel>
-          <Select
-            fullWidth
-            labelId="demo-simple-select-label"
-            id="demo-simple-select"
-            value={type}
-            onChange={(e: any) => {
-              setType(e.target.value);
-            }}
-          >
-            <MenuItem value={"covid-test"}>Covid Test</MenuItem>
-            <MenuItem value={"covid-vaccine"}>Covid Vaccine</MenuItem>
-          </Select>
+          <FormControl fullWidth>
+            <InputLabel id="profile">Profile</InputLabel>
+            <Select
+              fullWidth
+              labelId="profile"
+              id="demo-simple-select"
+              value={type}
+              onChange={(e: any) => {
+                setType(e.target.value);
+              }}
+            >
+              <MenuItem value={"covid-test"}>Profile 1</MenuItem>
+              <MenuItem value={"covid-vaccine"}>Profile 2</MenuItem>
+            </Select>
+          </FormControl>
+          <FormControl fullWidth>
+            <InputLabel id="demo-simple-select-label">
+              Appointment type
+            </InputLabel>
+            <Select
+              fullWidth
+              labelId="demo-simple-select-label"
+              id="demo-simple-select"
+              value={type}
+              onChange={(e: any) => {
+                setType(e.target.value);
+              }}
+            >
+              <MenuItem value={"covid-test"}>Covid Test</MenuItem>
+              <MenuItem value={"covid-vaccine"}>Covid Vaccine</MenuItem>
+            </Select>
+          </FormControl>
         </CardContent>
         <CardActions>
           <Link href="/dashboard">
