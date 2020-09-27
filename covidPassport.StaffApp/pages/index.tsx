@@ -8,6 +8,7 @@ import CardActions from "@material-ui/core/CardActions";
 import Button from "@material-ui/core/Button";
 import Link from "@material-ui/core/Link";
 
+import Typography from "@material-ui/core/Typography";
 
 
 // @material-ui/core components
@@ -28,26 +29,40 @@ import CardFooter from "../src/components/Card/CardFooter.js";
 import CustomInput from "../src/components/CustomInput/CustomInput.js";
 
 
-// card animation
-const [cardAnimaton, setCardAnimation] = React.useState("cardHidden");
-setTimeout(function() {
-  setCardAnimation("");
-}, 700);
 import styles from "../src/assets/jss/material-kit-react/views/loginPage.js";
 
-const useStyles = makeStyles(styles);
-const classes = useStyles();
 
 // const { ...rest } = props;
 
 
 export default function Index() {
+// card animation
+const [cardAnimaton, setCardAnimation] = React.useState("cardHidden");
+setTimeout(function() {
+  setCardAnimation("");
+}, 700);
 
+const useStyles = makeStyles(styles);
+const classes = useStyles();
 
     return (
-        <Container maxWidth="sm">
+        <div
+        className={classes.pageHeader}
+        style={{
+          backgroundImage: "url(" + "/bg7.jpg" + ")",
+          backgroundSize: "cover",
+          backgroundPosition: "top center",
+          height:"100vh",
+          margin:"-50px 0"
+          
+        }}
+      >
+        <div className={classes.container} style={{textAlign:"center"}}>
+        <Typography variant="h2" className="centerText" style={{margin:"50px"}}>
+                Covid Passport: Health Professional Login
+        </Typography>
             <Card>
-                <CardHeader title="Index" />
+                <CardHeader title="Login Using the Medical Credentials Provided to You" />
                 <CardContent>
                     <TextField
                         fullWidth
@@ -76,6 +91,7 @@ export default function Index() {
                 </CardActions>
             </Card>
 
-        </Container>
+        </div>
+        </div>
     );
 }

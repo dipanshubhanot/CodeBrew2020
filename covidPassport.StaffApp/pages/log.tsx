@@ -17,6 +17,28 @@ import TextField from "@material-ui/core/TextField";
 import {useRouter} from "next/router";
 import axios from "axios";
 
+import Card from "@material-ui/core/Card";
+
+// @material-ui/core components
+import { makeStyles } from "@material-ui/core/styles";
+import InputAdornment from "@material-ui/core/InputAdornment";
+import Icon from "@material-ui/core/Icon";
+// @material-ui/icons
+import Email from "@material-ui/icons/Email";
+import People from "@material-ui/icons/People";
+// core components
+import Header from "../src/components/Header/Header.js";
+import HeaderLinks from "../src/components/Header/HeaderLinks.js";
+import Footer from "../src/components/Footer/Footer.js";
+import GridContainer from "../src/components/Grid/GridContainer.js";
+import GridItem from "../src/components/Grid/GridItem.js";
+import CardBody from "../src/components/Card/CardBody.js";
+import CardFooter from "../src/components/Card/CardFooter.js";
+import CustomInput from "../src/components/CustomInput/CustomInput.js";
+
+
+import styles from "../src/assets/jss/material-kit-react/views/loginPage.js";
+
 
 
 function createData(id: string, name: string, date: string, apptDate: string, type: string, status: string) {
@@ -78,7 +100,14 @@ const StyledTableRow = withStyles((theme) => ({
 
 
 export default function Log() {
+// card animation
+const [cardAnimaton, setCardAnimation] = React.useState("cardHidden");
+setTimeout(function() {
+  setCardAnimation("");
+}, 700);
 
+const useStyles = makeStyles(styles);
+const classes = useStyles();
     const [selectedResult, setselectedResult] = useState("name")
     const [selectedQuery, setselectedQuery] = useState("")
     const handleChange = (event) => {
@@ -122,13 +151,25 @@ export default function Log() {
 
 
     return (
-        <Container maxWidth="sm">
-
-            <Typography variant="h2" className="centerText">
-                Covid Tracker
-            </Typography>
-
-
+    <div
+        className={classes.pageHeader}
+        style={{
+          backgroundImage: "url(" + "/bg7.jpg" + ")",
+          backgroundSize: "cover",
+          backgroundPosition: "top center",
+          height:"100vh",
+          margin:"-50px 0"
+          
+        }}
+      >
+        <div className={classes.container} style={{textAlign:"center"}}>
+        <Typography variant="h2" className="centerText" style={{margin:"50px"}}>
+                Covid Passport
+        </Typography>
+        <Typography variant="h4" className="centerText" style={{margin:"50px"}}>
+                Log for the Selected Profile
+        </Typography>
+            <Card>
             <TextField
                 id="queryID"
                 label="Search query"
@@ -201,6 +242,8 @@ export default function Log() {
           color: white;
         }
       `}</style>
-        </Container>
+      </Card>
+    </div>
+    </div>
     );
 }
