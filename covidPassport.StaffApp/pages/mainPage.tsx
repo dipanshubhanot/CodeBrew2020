@@ -1,6 +1,7 @@
 import React, {useState} from "react";
 import Container from "@material-ui/core/Container";
 import Typography from "@material-ui/core/Typography";
+import Grid from "@material-ui/core/Grid"
 
 import TableContainer from "@material-ui/core/TableContainer";
 import Table from "@material-ui/core/Table";
@@ -13,12 +14,37 @@ import TableBody from "@material-ui/core/TableBody";
 import Chip from "@material-ui/core/Chip";
 import MenuItem from "@material-ui/core/MenuItem";
 import Select from "@material-ui/core/Select";
-import TextField from "@material-ui/core/TextField";
 import {useRouter} from "next/router";
 import {Box} from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import Link from "@material-ui/core/Link";
 import axios from "axios";
+import Card from "@material-ui/core/Card";
+import CardHeader from "@material-ui/core/CardHeader";
+import CardContent from "@material-ui/core/CardContent";
+import TextField from "@material-ui/core/TextField";
+import CardActions from "@material-ui/core/CardActions";
+
+
+// @material-ui/core components
+import { makeStyles } from "@material-ui/core/styles";
+import InputAdornment from "@material-ui/core/InputAdornment";
+import Icon from "@material-ui/core/Icon";
+// @material-ui/icons
+import Email from "@material-ui/icons/Email";
+import People from "@material-ui/icons/People";
+// core components
+import Header from "../src/components/Header/Header.js";
+import HeaderLinks from "../src/components/Header/HeaderLinks.js";
+import Footer from "../src/components/Footer/Footer.js";
+import GridContainer from "../src/components/Grid/GridContainer.js";
+import GridItem from "../src/components/Grid/GridItem.js";
+import CardBody from "../src/components/Card/CardBody.js";
+import CardFooter from "../src/components/Card/CardFooter.js";
+import CustomInput from "../src/components/CustomInput/CustomInput.js";
+
+
+import styles from "../src/assets/jss/material-kit-react/views/loginPage.js";
 
 
 
@@ -97,23 +123,47 @@ export default function MainPage() {
         makeGetRequest('https://todo-h3gj3loe2q-uc.a.run.app/appointment?requirement=pending');
     }, [])
 
+// card animation
+const [cardAnimaton, setCardAnimation] = React.useState("cardHidden");
+setTimeout(function() {
+  setCardAnimation("");
+}, 700);
 
+const useStyles = makeStyles(styles);
+const classes = useStyles();
 
     return (
-        <Container maxWidth="sm">
-
-            <Typography variant="h2" className="centerText">
+        <div
+        className={classes.pageHeader}
+        style={{
+          backgroundImage: "url(" + "/bg7.jpg" + ")",
+          backgroundSize: "cover",
+          backgroundPosition: "top center",
+          height:"100vh",
+          margin:"-50px 0"
+          
+        }}
+      >
+        <div className={classes.container} style={{textAlign:"center"}}>
+        <Typography variant="h2" className="centerText" style={{margin:"50px"}}>
+                Covid Passport
+        </Typography>
+            <Typography variant="h4" className="centerText" style={{margin:"50px"}}>
                 Appointment List
             </Typography>
 
 
-
-            <TextField
+            <Card>
+            <Grid container spacing={3} style={{padding:"40px 0 0 40px"}}>
+                <Grid container item xs={3} spacing={3}>
+                <TextField
                 id="queryID"
                 label="Search query"
                 value={selectedQuery}
                 onChange = {handleSearchChange} />
+                </Grid>
 
+            <Grid container item xs={3} spacing={3} style={{margin:"20px"}}>
             <Select
                 labelId="resultID"
                 id="resultID-select"
@@ -123,8 +173,9 @@ export default function MainPage() {
                 <MenuItem value="name">Name</MenuItem>
                 <MenuItem value="date">Date</MenuItem>
             </Select>
-
-            <Box component="span" m={50}>
+            </Grid>
+            <Grid container item xs={3} spacing={3}>
+            <Box component="span" m={5}>
                 <Link href="/log">
                 <Button variant="contained" color="primary">
                     Check Log
@@ -132,6 +183,9 @@ export default function MainPage() {
                 </Link>
             </Box>
 
+            </Grid>
+            </Grid>
+            
 
             <TableContainer component={Paper}>
                 <Table aria-label="customized table">
@@ -188,6 +242,8 @@ export default function MainPage() {
           color: white;
         }
       `}</style>
-        </Container>
+      </Card>
+       </div>
+       </div>
     );
 }
