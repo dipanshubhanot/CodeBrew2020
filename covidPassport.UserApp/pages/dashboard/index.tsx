@@ -2,6 +2,12 @@ import React from "react";
 import Container from "@material-ui/core/Container";
 import Typography from "@material-ui/core/Typography";
 import Link from "next/link";
+// import CardHeader from "@material-ui/core/CardHeader";
+// import CardContent from "@material-ui/core/CardContent";
+// import Button from "@material-ui/core/Button";
+// import CardActions from "@material-ui/core/CardActions";
+// import Card from "@material-ui/core/Card";
+// import TextField from "@material-ui/core/TextField";
 import TableContainer from "@material-ui/core/TableContainer";
 import Table from "@material-ui/core/Table";
 import TableHead from "@material-ui/core/TableHead";
@@ -20,10 +26,25 @@ import ListItem from "@material-ui/core/ListItem";
 import List from "@material-ui/core/List";
 import MenuIcon from "@material-ui/icons/Menu";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
+// import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import InboxIcon from "@material-ui/icons/MoveToInbox";
 import MailIcon from "@material-ui/icons/Mail";
 import CovidPassportService from "../../services/CovidPassportService";
 import * as firebase from "firebase";
+
+
+import { makeStyles } from "@material-ui/core/styles";
+import Header from "../../src/components/Header/Header.js";
+import Footer from "../../src/components/Footer/Footer.js";
+import GridContainer from "../../src/components/Grid/GridContainer.js";
+import GridItem from "../../src/components/Grid/GridItem.js";
+import Button from "../../src/components/CustomButtons/Button.js";
+import HeaderLinks from "../../src/components/Header/HeaderLinks.js";
+import Parallax from "../../src/components/Parallax/Parallax.js";
+import styles from "../../src/assets/jss/material-kit-react/views/landingPage.js";
+
+
+
 
 const StyledTableCell = withStyles((theme) => ({
   head: {
@@ -106,16 +127,35 @@ export default function Index() {
 
     loadProfiles();
   }, []);
+ // card animation
+ const [cardAnimaton, setCardAnimation] = React.useState("cardHidden");
+ setTimeout(function() {
+   setCardAnimation("");
+ }, 700);
+ const useStyles = makeStyles(styles);
+ const classes = useStyles();
 
   return (
-    <Container maxWidth="sm">
+
+      <div
+        className={classes.pageHeader}
+        style={{
+          backgroundImage: "url(" + "/bg7.jpg" + ")",
+          backgroundSize: "cover",
+          backgroundPosition: "top center",
+          height:"100vh",
+          margin:"-50px 0"
+          
+        }}
+      >
+        <div className={classes.container}>
       <IconButton
         color="inherit"
         aria-label="open drawer"
         onClick={() => {
           setOpen(true);
         }}
-        edge="start"
+        
         className={`menu-button ${open ? "hide" : "nohide"}`}
         style={open ? { display: "none" } : {}}
       >
@@ -206,7 +246,10 @@ export default function Index() {
           </Link>
         </List>
       </Drawer>
-      <Typography variant="h3" className="centerText">
+      <Typography variant="h2" className="centerText" style={{margin:"50px"}}>
+                Covid Passport
+              </Typography>
+      <Typography variant="h4" className="centerText" style={{margin:'50px'}}>
         Results for {selectedProfile && selectedProfile.name}
       </Typography>
       <TableContainer component={Paper}>
@@ -266,16 +309,9 @@ export default function Index() {
           left: 25px !important;
         }
       `}</style>
-      {/* <Box my={4}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Next.js with TypeScript example
-        </Typography>
-        <Link href="/about" color="secondary">
-          Go to the about page
-        </Link>
-        <ProTip />
-        <Copyright />
-      </Box> */}
-    </Container>
+
+    </div>
+      </div>
+
   );
 }

@@ -10,14 +10,47 @@ const QrReader = dynamic(() => import("react-qr-reader"), {
   ssr: false,
 });
 
+
+import Header from "../../src/components/Header/Header.js";
+import Footer from "../../src/components/Footer/Footer.js";
+import GridContainer from "../../src/components/Grid/GridContainer.js";
+import GridItem from "../../src/components/Grid/GridItem.js";
+// import Button from "../../../src/components/CustomButtons/Button.js";
+import HeaderLinks from "../../src/components/Header/HeaderLinks.js";
+import Parallax from "../../src/components/Parallax/Parallax.js";
+import styles from "../../src/assets/jss/material-kit-react/views/landingPage.js";
+
+import { makeStyles, withStyles } from "@material-ui/core/styles";
+
 export default function Index() {
   const [data, setData] = React.useState();
   const [result, setResult] = React.useState();
 
+   // card animation
+ const [cardAnimaton, setCardAnimation] = React.useState("cardHidden");
+ setTimeout(function() {
+   setCardAnimation("");
+ }, 700);
+ const useStyles = makeStyles(styles);
+ const classes = useStyles();
   return (
+    <div
+    className={classes.pageHeader}
+        style={{
+          backgroundImage: "url(" + "/bg7.jpg" + ")",
+          backgroundSize: "cover",
+          backgroundPosition: "top center",
+          height:"100vh",
+          margin:"0px 0"
+          
+        }}
+    >
     <Container maxWidth="sm">
-      <Typography variant="h3" className="centerText">
-        Scan QR Code
+    <Typography variant="h2" className="centerText" style={{margin:"0px", color:"#fff", padding:"30px"}}>
+        Covid Passport
+      </Typography>
+      <Typography variant="h4" className="centerText" style={{margin:"0px", color:"#fff", padding:"30px"}}>
+        Validate Result
       </Typography>
       {!data && (
         <QrReader
@@ -97,5 +130,6 @@ export default function Index() {
         }
       `}</style>
     </Container>
+    </div>
   );
 }
