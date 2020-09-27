@@ -43,8 +43,7 @@ import HeaderLinks from "../../src/components/Header/HeaderLinks.js";
 import Parallax from "../../src/components/Parallax/Parallax.js";
 import styles from "../../src/assets/jss/material-kit-react/views/landingPage.js";
 
-// Section for the page
-import TeamSection from "./Sections/TeamSection.js";
+
 
 
 const StyledTableCell = withStyles((theme) => ({

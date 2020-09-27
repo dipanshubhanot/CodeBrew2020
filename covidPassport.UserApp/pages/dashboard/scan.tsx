@@ -23,7 +23,6 @@ import styles from "../../src/assets/jss/material-kit-react/views/landingPage.js
 import { makeStyles, withStyles } from "@material-ui/core/styles";
 
 export default function Index() {
-  const router = useRouter();
   const [data, setData] = React.useState();
   const [result, setResult] = React.useState();
 

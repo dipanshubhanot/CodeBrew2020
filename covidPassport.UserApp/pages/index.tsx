@@ -46,8 +46,6 @@ const StyledFirebaseAuth = dynamic(
 );
 import styles from "../src/assets/jss/material-kit-react/views/loginPage.js";
 
-// import image from "../src/assets/img/examples/bg7.jpg";
-
 const useStyles = makeStyles(styles);
 
 
