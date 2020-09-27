@@ -7,7 +7,7 @@
 
 Before running the demo web application, run the custom API - https://todo-h3gj3loe2q-uc.a.run.app/  
 Open demo web application (User/Scanner) - https://covid-passport-puk3916nv.vercel.app/  
-Open demo web application (Medical Staff) - https://covid-passport-staff.vercel.app/  
+Open demo web application (Medical Staff) - https://covid-passport-staff-k7ateint8.vercel.app/
 
 **Note: The API and the web applications need to be runnning simultaneously for the applications to work.**
 
